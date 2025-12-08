@@ -8,13 +8,15 @@
 #pragma once
 
 #include "Types.h"
-#define BUILDINGS_COUNT 20
-#define MAX_EXPLOSIONS 200
+#define BUILDINGS_COUNT 40
+#define MAX_EXPLOSIONS 300
 
 extern const float GRAVITY;
 
 typedef struct GameWorld {
-    Cannon *cannon;
+    Cannon *cannon1;
+    Cannon *cannon2;
+    Cannon *currentCannon;
     Building buildings[BUILDINGS_COUNT];
     Explosion explosions[MAX_EXPLOSIONS];
     int explosionCount;
@@ -39,3 +41,5 @@ void updateGameWorld( GameWorld *gw, float delta );
  * @brief Draws the state of the game.
  */
 void drawGameWorld( GameWorld *gw );
+
+void swapCurrentCannon( GameWorld *gw );

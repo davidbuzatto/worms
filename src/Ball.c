@@ -36,7 +36,7 @@ void updateBall( Ball *ball, float delta ) {
 
     ball->vel.y += GRAVITY * delta;
 
-    if ( ( ball->pos.x - ball->radius > GetScreenWidth() ) || ( ball->pos.y - ball->radius > GetScreenHeight() ) ) {
+    if ( ( ball->pos.x - ball->radius > GetScreenWidth() ) || ( ball->pos.x + ball->radius < 0 ) || ( ball->pos.y - ball->radius > GetScreenHeight() ) ) {
         ball->alive = false;
     }
 

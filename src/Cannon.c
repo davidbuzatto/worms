@@ -9,7 +9,7 @@
 
 static void drawBallTrail( Cannon *cannon );
 
-Cannon *createCannon( float x, float y, float width, float height, Color color ) {
+Cannon *createCannon( float x, float y, float width, float height, float angle, Color color ) {
 
     Cannon *new = (Cannon*) malloc( sizeof( Cannon ) );
     *new = (Cannon) { 0 };
@@ -20,7 +20,7 @@ Cannon *createCannon( float x, float y, float width, float height, Color color )
         .width = width,
         .height = height
     };
-
+    new->angle = angle;
     new->color = color;
     new->mousePos = (Vector2) {0};
     new->preparing = false;
@@ -38,7 +38,7 @@ void destroyCannon( Cannon *cannon ) {
     free( cannon );
 }
 
-void updateCannon( Cannon *cannon, float delta ) {
+void updateCannon( Cannon *cannon, float delta, GameWorld *gw ) {
     
     if ( cannon->ball == NULL ) {
 
@@ -69,8 +69,8 @@ void updateCannon( Cannon *cannon, float delta ) {
             cannon->ball = createBall( 
                 cannon->rect.x + cannon->rect.width / 2, 
                 cannon->rect.y + cannon->rect.height / 2, 
-                10, 
-                RED,
+                6, 
+                cannon->color,
                 cannon->magnitude,
                 cannon->angle
             );
@@ -85,6 +85,7 @@ void updateCannon( Cannon *cannon, float delta ) {
             cannon->ball = NULL;
             cannon->preparing = false;
             cannon->fired = false;
+            swapCurrentCannon( gw );
         }
     }
 
@@ -121,8 +122,21 @@ void drawCannon( Cannon *cannon ) {
         drawBall( cannon->ball );
     }
 
-    DrawText( TextFormat( "magnitude: %.2f", cannon->magnitude ), 10, 10, 20, BLACK );
-    DrawText( TextFormat( "angle: %.2f", RAD2DEG * cannon->angle ), 10, 30, 20, BLACK );
+    float h = cannon->rect.height / 2;
+    DrawRectanglePro( 
+        (Rectangle) {
+            cannon->rect.x + cannon->rect.width / 2,
+            cannon->rect.y + cannon->rect.height / 2,
+            cannon->rect.width * 1.5,
+            h
+        },
+        (Vector2) { h / 2, h /2 },
+        RAD2DEG * cannon->angle,
+        ColorBrightness( cannon->color, -0.5f )
+    );
+
+    /*DrawText( TextFormat( "magnitude: %.2f", cannon->magnitude ), 10, 10, 20, BLACK );
+    DrawText( TextFormat( "angle: %.2f", RAD2DEG * cannon->angle ), 10, 30, 20, BLACK );*/
 
 }
 
@@ -139,7 +153,7 @@ static void drawBallTrail( Cannon *cannon ) {
         cannon->magnitude * sinf( cannon->angle )
     };
 
-    float delta = GetFrameTime();
+    float delta = 1.0f / GetFPS();
 
     for ( int i = 1; i < 300; i++ ) {
 
@@ -147,8 +161,8 @@ static void drawBallTrail( Cannon *cannon ) {
         pos.y += vel.y * delta;
         vel.y += GRAVITY * delta;
 
-        DrawLineV( prevPos, pos, GREEN );
-        DrawCircleV( pos, 2, GREEN );
+        DrawLineV( prevPos, pos, ColorBrightness( cannon->color, 0.5f ) );
+        DrawCircleV( pos, 2, ColorBrightness( cannon->color, 0.5f ) );
 
         prevPos = pos;
     }

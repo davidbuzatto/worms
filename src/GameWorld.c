@@ -8,6 +8,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "ResourceManager.h"
 #include "GameWorld.h"
 #include "Types.h"
 #include "Cannon.h"
@@ -31,11 +32,10 @@ GameWorld* createGameWorld( void ) {
 
     GameWorld *gw = (GameWorld*) malloc( sizeof( GameWorld ) );
 
-    gw->cannon = createCannon( 50, 190, 60, 60, BLUE );
+    float w = GetScreenWidth() / BUILDINGS_COUNT;
 
     for ( int i = 0; i < BUILDINGS_COUNT; i++ ) {
-        float w = 50;
-        float h = 100 + GetRandomValue( 0, 5 ) * 20;
+        float h = 100 + GetRandomValue( 0, 10 ) * 20;
         gw->buildings[i] = (Building) {
             .rect = {
                 .x = w * i,
@@ -47,6 +47,10 @@ GameWorld* createGameWorld( void ) {
         };
     }
 
+    gw->cannon1 = createCannon( gw->buildings[2].rect.x, gw->buildings[2].rect.y - w, w, w, DEG2RAD * -45.0f, BLUE );
+    gw->cannon2 = createCannon( gw->buildings[BUILDINGS_COUNT-3].rect.x, gw->buildings[BUILDINGS_COUNT-3].rect.y - w, w, w, DEG2RAD * -135.0f, RED );
+    gw->currentCannon = gw->cannon1;
+
     gw->explosionCount = 0;
 
     return gw;
@@ -57,7 +61,8 @@ GameWorld* createGameWorld( void ) {
  * @brief Destroys a GameWindow object and its dependecies.
  */
 void destroyGameWorld( GameWorld *gw ) {
-    destroyCannon( gw->cannon );
+    destroyCannon( gw->cannon1 );
+    destroyCannon( gw->cannon2 );
     free( gw );
 }
 
@@ -65,7 +70,7 @@ void destroyGameWorld( GameWorld *gw ) {
  * @brief Reads user input and updates the state of the game.
  */
 void updateGameWorld( GameWorld *gw, float delta ) {
-    updateCannon( gw->cannon, delta );
+    updateCannon( gw->currentCannon, delta, gw );
     resolveCollisionBallBuildings( gw );
 }
 
@@ -85,7 +90,8 @@ void drawGameWorld( GameWorld *gw ) {
         drawExplosion( &gw->explosions[i] );
     }
 
-    drawCannon( gw->cannon );
+    drawCannon( gw->cannon1 );
+    drawCannon( gw->cannon2 );
 
     EndDrawing();
 
@@ -93,7 +99,7 @@ void drawGameWorld( GameWorld *gw ) {
 
 static void resolveCollisionBallBuildings( GameWorld *gw ) {
 
-    Ball *ball = gw->cannon->ball;
+    Ball *ball = gw->currentCannon->ball;
 
     if ( ball != NULL && ball->alive ) {
 
@@ -125,4 +131,12 @@ static void resolveCollisionBallBuildings( GameWorld *gw ) {
 
     }
 
+}
+
+void swapCurrentCannon( GameWorld *gw ) {
+    if ( gw->currentCannon == gw->cannon1 ) {
+        gw->currentCannon = gw->cannon2;
+    } else {
+        gw->currentCannon = gw->cannon1;
+    }
 }
