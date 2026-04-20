@@ -28,7 +28,7 @@ static void resolveCollisionBallBuildings( GameWorld *gw );
 /**
  * @brief Creates a dinamically allocated GameWorld struct instance.
  */
-GameWorld* createGameWorld( void ) {
+GameWorld *createGameWorld( void ) {
 
     GameWorld *gw = (GameWorld*) malloc( sizeof( GameWorld ) );
 
